@@ -1,14 +1,10 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 
-```{r}
+
+```r
   library("ggplot2")
   data = read.csv("activity.csv")
   data$date = as.Date(as.character(data$date))
@@ -17,46 +13,56 @@ output:
 
 ## What is mean total number of steps taken per day?
 
-```{r}
+
+```r
   cleanedData = data[!is.na(data$steps),] 
   ag1 = aggregate(cleanedData[, 1], list(cleanedData$date), sum)
   colnames(ag1) = c("date", "sumSteps")
   hist(ag1$sumSteps, xlab = "sumSteps", main = "Histogram of sumSteps")
 ```
 
-```{r}
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
+
+```r
   meanSteps = mean(ag1$sumSteps)
   medianSteps = median(ag1$sumSteps)
 ```
 
-Mean of total number of steps taken per day is `r as.character(meanSteps)`. Median is `r as.character(medianSteps)`.
+Mean of total number of steps taken per day is 10766.1886792453. Median is 10765.
 
 
 ## What is the average daily activity pattern?
 
-```{r}
+
+```r
   ag2 = aggregate(cleanedData[, 1], list(cleanedData$interval), mean)
   colnames(ag2) = c("inteval", "meanSteps")
   plot(ag2, type = "l")
 ```
 
-```{r}
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
+
+```r
   maxInterval = ag2$inteval[max(ag2$meanSteps) ]
 ```
 
-Interval, on average across all the days in the dataset, which contains the maximum number of steps is `r maxInterval`.
+Interval, on average across all the days in the dataset, which contains the maximum number of steps is 1705.
 
 ## Imputing missing values
 
-```{r}
+
+```r
   nMissed = nrow(data[!complete.cases(data), ])
 ```
 
-Total number of rows with NA's is `r nMissed`.
+Total number of rows with NA's is 2304.
 
 All missing values are filled by mean for 5-minute intervals.
 
-```{r}
+
+```r
   filledData = data
   filledData$steps[is.na(filledData$steps)] = ag2$meanSteps[match(ag2$inteval, filledData$interval)]
 
@@ -65,23 +71,24 @@ All missing values are filled by mean for 5-minute intervals.
   hist(ag3$sumSteps, xlab = "sumSteps", main = "Histogram of sumSteps")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 
 
-```{r}
+
+
+```r
   meanSteps3 = mean(ag3$sumSteps)
   medianSteps3 = median(ag3$sumSteps)
 ```
 
-New mean is `r as.character(meanSteps3)`, and is the same value as before. New median is `r as.character(medianSteps3)` and is different then before. Changing NA to mean will not change the mean, but can change the median (if mean is equals median, median will also not change).
+New mean is 10766.1886792453, and is the same value as before. New median is 10766.1886792453 and is different then before. Changing NA to mean will not change the mean, but can change the median (if mean is equals median, median will also not change).
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r echo=FALSE, results='hide'}
-  #Change to english names of days  
-  Sys.setlocale("LC_TIME", "C")  
-```
 
 
-```{r }
+
+
+```r
   weekend = c( "Saturday", "Sunday")
   weekData = filledData
   weekData$typeOfDay = weekdays(weekData$date)
@@ -92,4 +99,6 @@ New mean is `r as.character(meanSteps3)`, and is the same value as before. New m
   with(ag4[ ag4$typeOfDay == "weekday",], plot(x = interval, y = meanSteps, type = "l", main = "weekdays"))
   with(ag4[ ag4$typeOfDay == "weekend",], plot(x = interval, y = meanSteps, type = "l", main = "weekends"))
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
 
